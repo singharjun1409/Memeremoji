@@ -1,4 +1,15 @@
 document.addEventListener('DOMContentLoaded', main);
+// Shuffle Function
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+// Default Card Faces
+const emojis = [128512, 128520 ,128509, 128511 , 128529 , 128074 , 128111, 128143 , 128123
+     , 128064 , 128133 , 128169 , 128187 , 9971 , 128640 , 128679 , 128018 , 127825];
 
 // Ensuring events run after webpage has been loaded
 function main(){
@@ -37,7 +48,6 @@ function getInput(){
             }
                 
         }
-        console.log("Count: ", count);
         for (let key in count){
             if (count[key] !== 2){
                 alert("Invalid Card Faces: Each Card Face must be entered twice and only twice");
@@ -48,7 +58,35 @@ function getInput(){
     }
 
     // Input is Valid
-    if(isValid){}
+    if(isValid){
+        // Hiding form
+        const start = document.getElementsByClassName("start")[0]
+        start.style.visibility="hidden";
+        
+        // Displaying Game Board
+        const game = document.getElementsByClassName("game")[0]
+        for (let i = 0; i < numCards; i++)
+        {
+            if(cardFaces)
+            {
+                shuffleArray(cardFaces);
+            }
+            else
+            {
+                cardFaces = [];
+                while(cardFaces.length < numCards){
+                    let index =  Math.floor(Math.random() * (18));
+                    if(!(emojis[index] in cardFaces)){
+                        cardFaces.push(emojis[index]);
+                        cardFaces.push(emojis[index]);
+                    }
+                }
+                shuffleArray(cardFaces);
+            }
+        }
+        console.log(cardFaces);
+        game.style.visibility="visible";
+    }
 }
 
 }
