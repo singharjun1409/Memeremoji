@@ -1,4 +1,12 @@
 document.addEventListener('DOMContentLoaded', main);
+let numCards, maxTurns, cardFaces, isValid, firstCard , secondCard;
+let lockBoard = false;
+let turns = 0; let score = 0;
+
+// Default Card Faces
+const emojis = ['\u{1F600}', '\u{1F608}', '\u{1F605}', '\u{1F607}', '\u{1F611}', '\u{1F44A}', '\u{1F46F}', '\u{1F491}', '\u{1F47B}',
+    '\u{1F440}', '\u{1F485}', '\u{1F4A9}', '\u{1F4BB}', '\u{2693}', '\u{1F680}', '\u{1F697}', '\u{1F418}', '\u{1F34D}'];
+
 // Shuffle Function
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
@@ -7,27 +15,37 @@ function shuffleArray(array) {
     }
 }
 
-// Default Card Faces
-const emojis = [128512, 128520 ,128509, 128511 , 128529 , 128074 , 128111, 128143 , 128123
-     , 128064 , 128133 , 128169 , 128187 , 9971 , 128640 , 128679 , 128018 , 127825];
-
 // Ensuring events run after webpage has been loaded
 function main(){
+//const score = document.createElement("div");
+//score.data = 
 const buttons = document.getElementsByClassName("play-btn")
 buttons[0].addEventListener("click" , getInput);
-function getInput(){
+
+// Score Element
+let scoreElement = document.createElement("div");
+scoreElement.className = "score";
+scoreElement.id = "score";
+scoreElement.innerText = 0;
+
+const game = document.getElementsByClassName('game')[0]
+
+function getInput()
+{
     const inputs = document.getElementsByTagName("input");
-    const numCards = inputs[0].value;
-    const maxTurns = inputs[1].value;
-    let cardFaces = inputs[2].value;
+    numCards = inputs[0].value;
+    maxTurns = inputs[1].value;
+    cardFaces = inputs[2].value;
+    isValid = true;
+    
     // Input Validation
-    let isValid = true;
     if (!(numCards > 2 && numCards <= 36 && numCards % 2 == 0)){
         alert("Invalid Number of Cards:\n2 < Number of Cards <= 36 and should be even");
         isValid = false;
 
     }
-    else if(!(maxTurns >= (numCards/2))){
+    else if(!(maxTurns >= (numCards/2)))
+    {
         alert("Invalid number of Turns:\nNumber of Turns >= Number of Cards/2");
         isValid = false;
     }
@@ -56,38 +74,163 @@ function getInput(){
             }
         }
     }
-
-    // Input is Valid
-    if(isValid){
-        // Hiding form
-        const start = document.getElementsByClassName("start")[0]
-        start.style.visibility="hidden";
+    generateBoard();
+}
+function generateBoard(){
+// Input is Valid
+if(isValid)
+{
         
-        // Displaying Game Board
-        const game = document.getElementsByClassName("game")[0]
-        for (let i = 0; i < numCards; i++)
+    // Hiding form
+    const start = document.getElementsByClassName("start")[0]
+    start.style.display="none";
+        
+    
+    // Creating cards if user did not input
+    if (!cardFaces)
+    {
+        cardFaces = [];
+        let indices = [];
+        while(cardFaces.length < numCards)
         {
-            if(cardFaces)
+            let index =  Math.floor(Math.random() * (18));
+            if(index in indices)
             {
-                shuffleArray(cardFaces);
             }
             else
             {
-                cardFaces = [];
-                while(cardFaces.length < numCards){
-                    let index =  Math.floor(Math.random() * (18));
-                    if(!(emojis[index] in cardFaces)){
-                        cardFaces.push(emojis[index]);
-                        cardFaces.push(emojis[index]);
-                    }
-                }
-                shuffleArray(cardFaces);
+                cardFaces.push(emojis[index]);
+                cardFaces.push(emojis[index]);
+                indices.push(index);
             }
         }
-        console.log(cardFaces);
-        game.style.visibility="visible";
+        console.log("Indices: " , indices);
     }
-}
+    shuffleArray(cardFaces);
+    let current = []
+    let score = 0;
+    let turns = 0;
+    let rounds = 0;
 
+    fillBoard();
+}}
+
+// Filling board with cards
+function fillBoard()
+{
+    for (let i = 0; i < cardFaces.length; i++)
+        {
+            let card = document.createElement("div");
+            card.classList.add("card");
+            card.setAttribute("dataname", cardFaces[i]);
+            card.id = i;
+            card.innerHTML = `<text>${cardFaces[i]}</text>`;
+            game.appendChild(card);
+            card.addEventListener("click" , checkCard);
+        }
+    game.appendChild(scoreElement);
+    game.style.visibility = "visible";
+    
+    
+
+}
+   
+    // Event Listener for Cards
+    function checkCard()
+    {
+        turns += 1;
+        if (lockBoard) return;
+        if(this === firstCard) return;
+        this.classList.add("checked");
+
+        if (!firstCard)
+        {
+            firstCard = this;
+            return;
+        }
+        secondCard = this;
+        lockBoard = true;
+        checkMatch();
+    }
+
+
+    // Checking for a match in the selected cards
+    function checkMatch()
+    {
+        let isMatch = firstCard.getAttribute("dataname") === secondCard.getAttribute("dataname");
+        continuePlaying(isMatch);
+    }
+
+    // Function to continue with the game
+    function continuePlaying(isMatch)
+    {
+        if(isMatch)
+        {
+            score += 1
+            if(score === numCards/2)
+                {
+                    alert("Game Over! Score: " + score + "/" + numCards/2);
+                    restart();
+                }
+            else
+            {
+                disableCards();
+            }
+            
+        }
+        else
+        {
+            uncheckCards();
+        }
+        if (turns >= (maxTurns*2))
+        {
+            alert("Game Over! Score: " + score + "/" + numCards/2);
+            restart();
+        }
+
+        
+    }
+
+    // Freezing the cards if a match was found
+    function disableCards()
+    {
+        setTimeout(()=>
+        {
+            alert("Good Job!");
+            firstCard.removeEventListener("click" , checkCard);
+            secondCard.removeEventListener("click" , checkCard);
+            resetBoard();
+        }, 100);
+    }
+    
+    // Uncheking the cards if they don't match
+    function uncheckCards()
+    {
+        setTimeout(()=>{
+        alert("Not Quite!");
+        firstCard.classList.remove("checked");
+        secondCard.classList.remove("checked");
+        resetBoard();} , 1000);
+    }
+
+    function resetBoard()
+    {
+        scoreElement.innerText = score + "/" + numCards/2;
+        firstCard = null;
+        secondCard = null;
+        lockBoard = false;
+    }
+
+    function restart() {
+        score = 0;
+        turns = 0;
+        resetBoard();
+        while(game.firstChild)
+        {
+            game.removeChild(game.firstChild);
+        }
+        shuffleArray(cardFaces);
+        fillBoard();
+      } 
 }
 
