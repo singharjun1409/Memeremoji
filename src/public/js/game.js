@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', main);
 let numCards, maxTurns, cardFaces, isValid, firstCard , secondCard;
 let lockBoard = false;
 let turns = 0; let score = 0;
-
+const body = document.body;
 // Default Card Faces
 const emojis = ['\u{1F600}', '\u{1F608}', '\u{1F605}', '\u{1F607}', '\u{1F611}', '\u{1F44A}', '\u{1F46F}', '\u{1F491}', '\u{1F47B}',
     '\u{1F440}', '\u{1F485}', '\u{1F4A9}', '\u{1F4BB}', '\u{2693}', '\u{1F680}', '\u{1F697}', '\u{1F418}', '\u{1F34D}'];
@@ -15,10 +15,41 @@ function shuffleArray(array) {
     }
 }
 
+// Game Controls (quit)
+const controls = document.createElement("div");
+controls.className = "controls"
+
+// Quit Button
+const quit = document.createElement("button");
+quit.className = "quit";
+quit.id = "quit";
+quit.innerText = "Quit";
+
+quit.addEventListener("click" , gameQuit);
+controls.appendChild(quit)
+
+const result = document.getElementsByClassName("result")[0];
+const parent = result.parentElement;
+parent.insertBefore(controls , result);
+
+function gameQuit()
+{
+    numCards = 0; maxTurns = 0; cardFaces = []; isValid = true; firstCard = null; secondCard = null; 
+    lockBoard = false;turns = 0; score = 0;
+    const game = document.getElementsByClassName("game")[0];
+    while(game.firstChild)
+        {
+            game.removeChild(game.firstChild);
+        }
+    game.classList.add("hidden")
+    const start = document.getElementsByClassName("start")[0]
+    start.classList.remove("hidden")
+    main();
+
+}
 // Ensuring events run after webpage has been loaded
 function main(){
-//const score = document.createElement("div");
-//score.data = 
+controls.classList.add("hidden");
 const buttons = document.getElementsByClassName("play-btn")
 buttons[0].addEventListener("click" , getInput);
 
@@ -26,7 +57,13 @@ buttons[0].addEventListener("click" , getInput);
 let scoreElement = document.createElement("div");
 scoreElement.className = "score";
 scoreElement.id = "score";
-scoreElement.innerText = 0;
+scoreElement.innerText = "Score: ";
+
+// Turns Elements
+let turnElement = document.createElement("div");
+turnElement.className = "turns"
+turnElement.id = "turns";
+turnElement.innerText = "Turns: ";
 
 const game = document.getElementsByClassName('game')[0]
 
@@ -75,6 +112,8 @@ function getInput()
         }
     }
     generateBoard();
+    this.removeEventListener("click" , getInput);
+    controls.classList.remove("hidden");
 }
 function generateBoard(){
 // Input is Valid
@@ -83,7 +122,7 @@ if(isValid)
         
     // Hiding form
     const start = document.getElementsByClassName("start")[0]
-    start.style.display="none";
+    start.classList.add("hidden");
         
     
     // Creating cards if user did not input
@@ -129,16 +168,16 @@ function fillBoard()
             card.addEventListener("click" , checkCard);
         }
     game.appendChild(scoreElement);
-    game.style.visibility = "visible";
-    
-    
+    game.appendChild(turnElement);
+    //game.style.display = "grid"
+    game.classList.remove("hidden");
 
 }
    
     // Event Listener for Cards
     function checkCard()
     {
-        turns += 1;
+        
         if (lockBoard) return;
         if(this === firstCard) return;
         this.classList.add("checked");
@@ -148,6 +187,7 @@ function fillBoard()
             firstCard = this;
             return;
         }
+        turns += 1;
         secondCard = this;
         lockBoard = true;
         checkMatch();
@@ -172,6 +212,11 @@ function fillBoard()
                     alert("Game Over! Score: " + score + "/" + numCards/2);
                     restart();
                 }
+            else if(turns >= maxTurns)
+            {
+                alert("Game Over! Score: " + score + "/" + numCards/2);
+                restart();
+            }
             else
             {
                 disableCards();
@@ -182,7 +227,7 @@ function fillBoard()
         {
             uncheckCards();
         }
-        if (turns >= (maxTurns*2))
+        if (turns >= (maxTurns))
         {
             alert("Game Over! Score: " + score + "/" + numCards/2);
             restart();
@@ -215,7 +260,8 @@ function fillBoard()
 
     function resetBoard()
     {
-        scoreElement.innerText = score + "/" + numCards/2;
+        scoreElement.innerText = "Score: " + score + "/" + numCards/2;
+        turnElement.innerText = "Turns: " + turns + "/" + maxTurns;
         firstCard = null;
         secondCard = null;
         lockBoard = false;
@@ -233,4 +279,5 @@ function fillBoard()
         fillBoard();
       } 
 }
+
 

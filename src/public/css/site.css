@@ -6,7 +6,7 @@ body {
 	width: 4em;
 }
 
-.game, .result, .reset, .error-message {
+.result, .reset, .error-message {
 	visibility: hidden;
 }
 
@@ -61,7 +61,7 @@ body {
 .game {
     display: grid;
     grid-template-columns: auto auto;
-    background-color: dodgerblue;
+    /*background-color: dodgerblue;*/
     padding: 10px;
     gap: 30px;
   }
