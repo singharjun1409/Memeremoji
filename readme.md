@@ -3,3 +3,12 @@ MemorEmoji is a card game in which a deck of cards containing pairs of symbols a
 
 ## Instructions
 Enter the number of cards (must be even and in range (2,36]), and the number of tries (minimum number of cards / 2). Optionally enter the face values for the cards as comma seperated values (these must be in pairs and must equal the number of cards). The program will generate emojis as card faces if this field is left blank. Then press "game start" and enjoy!
+
+## Gallery
+![Setup](Documentation/Setup.png)
+
+
+![Wrong Choice](Documentation/Wrong%20Choice.png)
+
+
+![Game Over](Documentation/Game%20Over.png)
